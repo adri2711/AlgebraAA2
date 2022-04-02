@@ -1,84 +1,101 @@
 class Particle {
-  private PVector pos;
-  private PVector speed;
-  private PVector anchor;
   private float mass;
+  private PVector index;
+  private PVector pos;
+  private PVector posInit;
+  private PVector vel;
+  private PVector acc;
+  private PVector force;
   private color color_p;
-  private int size;
   private boolean isFixed = false;
-  
-  Particle (PVector pos, boolean isFixed, PVector anchor, float mass, color color_p, int size) {
-    this.pos = pos.copy();
-    this.speed = new PVector(0,0,0);
-    this.anchor = anchor.copy();
+
+  Particle (int row, int col, int spacing, float mass, boolean isFixed, color color_p) {
+    this.index = new PVector(row, col);
+    this.pos = new PVector((row-1) * spacing, (col-1) * spacing, 0.0);
+    this.posInit = this.pos.copy();
+
     this.mass = mass;
     this.color_p = color_p;
-    this.size = size;
     this.isFixed = isFixed;
+
+    force = new PVector(0.0, 0.0, 0.0);
+    vel = new PVector(0.0, 0.0, 0.0);
+    acc = new PVector(0.0, 0.0, 0.0);
   }
-  
-  void ChangeAnchor(PVector newAnchor) {
-    anchor = newAnchor;
+
+
+  //CalculateAdjacentForce:
+  //  Adds tension and friction forces applied by an adjacent particle (adj).
+  //
+  void CalculateAdjacentForce(Particle adj) {
+
+    float distInit = posInit.dist(adj.posInit);
+    float distCurr = pos.dist(adj.pos);
+
+    float tension = -kElastic * (distCurr - distInit);    //-k*dx
+    PVector tVector = (pos.sub(adj.pos)).div(distCurr);   //Normalized tension vector
+    force.sub(tVector.mult(tension));
+
+    PVector fVector = vel.sub(adj.vel);                   //Friction vector
+    force.sub(fVector.mult(-kFriction));
   }
-  
-  void Move() {
-    PVector force, acc;
-    float deltaTime;
-    float kFriction, kSpring; //spring = muelle en espanyo pa tos los paletos iletrados
-    
-    force = new PVector(0.0,0.0,0.0);
-    acc = new PVector(0.0,0.0,0.0);
-    deltaTime = 0.04;
-    kFriction = 0.02;
-    kSpring = 0.5;
-    
-    //1- Add all forces
-    //Gravity
-    force.x = 0.0;
-    force.y = 9.8;
-    force.z = 0.0;
-    
-    //Friction
-    force.x += -1.0 * kFriction * speed.x;
-    force.y += -1.0 * kFriction * speed.y;
-    force.z += -1.0 * kFriction * speed.z;
-    
-    //Spring
-    force.x += -1.0 * kSpring * (pos.x - anchor.x);
-    force.y += -1.0 * kSpring * (pos.y - anchor.y);    
-    force.z += -1.0 * kSpring * (pos.z - anchor.z);
-    
-    //2- Calculate acceleration
-    acc.x = force.x / mass;
-    acc.y = force.y / mass;
-    acc.y = force.z / mass;
-    
-    //3- Calculate phase
-    speed.x += deltaTime * acc.x;
-    speed.y += deltaTime * acc.y;
-    speed.z += deltaTime * acc.z;
-    
-    pos.x += deltaTime * speed.x;
-    pos.y += deltaTime * speed.y;
-    pos.z += deltaTime * speed.z;
+
+  //CalculateGravity:
+  //  Adds force of gravity.
+  //
+  void CalculateGravity() {
+    force.sub(gravity.mult(mass));
   }
-  
+
+  //Update:
+  //  Updates velocity, acceleration and position of the particle based
+  //  on the forces that affect it.
+  void Update() {
+    acc = force.div(mass);
+    if (eulerSolver) {
+      vel = new PVector(Euler(vel.x, acc.x, deltaTime), Euler(vel.y, acc.y, deltaTime));
+      pos = new PVector(Euler(pos.x, vel.x, deltaTime), Euler(pos.y, vel.y, deltaTime));
+    }
+  }
+
+  void SetPos(PVector newPos) {
+    pos = newPos.copy();
+  }
+
+  void SetForce(PVector newForce) {
+    force = newForce.copy();
+  }
+
+
   void Draw() {
     push();
-    translate(pos.x,pos.y,pos.z);
+    translate(pos.x, pos.y, pos.z);
     rotateX(radians(-35.26));
     rotateY(radians(45));
-    
+
     strokeWeight(0);
     fill(color_p);
-    ellipse(0,0,size,size);
+    ellipse(0, 0, mass, mass);
     pop();
   }
-  
-  PVector ReturnAnchor() {
-    return anchor;
+
+  /*void Debug() {
+   print("Pos: ", pos.x, ",", pos.y, ",", pos.z, "\n");
+   print("Anchor: ", anchor.x, ",", anchor.y, ",", anchor.z, "\n");
+   if (!isFixed) {
+   print("Force: ", force.x, ",", force.y, ",", force.z, "\n");
+   print("Speed: ", speed.x, ",", speed.y, ",", speed.z, "\n");
+   } else {
+   print ("Fixed\n");
+   }
+   print("\n");
+   }*/
+
+
+  PVector ReturnPos() {
+    return pos;
   }
-  
+
   boolean IsFixed() {
     return isFixed;
   }
