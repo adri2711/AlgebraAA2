@@ -9,9 +9,9 @@ class Particle {
   private color color_p;
   private boolean isFixed = false;
 
-  Particle (int row, int col, int spacing, float mass, boolean isFixed, color color_p) {
+  Particle (int row, int col, float mass, boolean isFixed, color color_p) {
     this.index = new PVector(row, col);
-    this.pos = new PVector((row-1) * spacing, (col-1) * spacing, 0.0);
+    this.pos = new PVector((row-1) * SPACING, (col-1) * SPACING, 0.0);
     this.posInit = this.pos.copy();
 
     this.mass = mass;
@@ -32,19 +32,19 @@ class Particle {
     float distInit = posInit.dist(adj.posInit);
     float distCurr = pos.dist(adj.pos);
 
-    float tension = -kElastic * (distCurr - distInit);    //-k*dx
+    float tension = -K_ELASTIC * (distCurr - distInit);    //-k*dx
     PVector tVector = (pos.sub(adj.pos)).div(distCurr);   //Normalized tension vector
     force.sub(tVector.mult(tension));
 
     PVector fVector = vel.sub(adj.vel);                   //Friction vector
-    force.sub(fVector.mult(-kFriction));
+    force.sub(fVector.mult(-K_FRICTION));
   }
 
   //CalculateGravity:
   //  Adds force of gravity.
   //
   void CalculateGravity() {
-    force.sub(gravity.mult(mass));
+    force.sub(GRAVITY.mult(mass));
   }
 
   //Update:
@@ -52,9 +52,13 @@ class Particle {
   //  on the forces that affect it.
   void Update() {
     acc = force.div(mass);
-    if (eulerSolver) {
-      vel = new PVector(Euler(vel.x, acc.x, deltaTime), Euler(vel.y, acc.y, deltaTime));
-      pos = new PVector(Euler(pos.x, vel.x, deltaTime), Euler(pos.y, vel.y, deltaTime));
+    //Euler solver
+    if (EULER_SOLVER) {
+      vel = new PVector(Euler(vel.x, acc.x, DELTA_T), Euler(vel.y, acc.y, DELTA_T), Euler(vel.z, acc.z, DELTA_T));
+      pos = new PVector(Euler(pos.x, vel.x, DELTA_T), Euler(pos.y, vel.y, DELTA_T), Euler(pos.z, vel.z, DELTA_T));
+    }
+    //Something something solver
+    else {
     }
   }
 
@@ -69,13 +73,13 @@ class Particle {
 
   void Draw() {
     push();
-    translate(pos.x, pos.y, pos.z);
+    /*translate(pos.x, pos.y, pos.z);
     rotateX(radians(-35.26));
-    rotateY(radians(45));
+    rotateY(radians(45));*/
 
     strokeWeight(0);
     fill(color_p);
-    ellipse(0, 0, mass, mass);
+    ellipse(0, 0, mass*10, mass*10);
     pop();
   }
 
