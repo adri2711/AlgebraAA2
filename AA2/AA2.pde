@@ -1,25 +1,26 @@
 int ROW_NUM = 10;
-int COL_NUM = 10;
-Particle[][] particle = new Particle[ROW_NUM][COL_NUM];
-int SPACING = 30;
+int COL_NUM = 15;
+Particle[][] particle = new Particle[COL_NUM][ROW_NUM];
+float SPACING = 20.0f;  //space between nodes
+float TILT = 60f;      //tilt of the cloth
 
-float DELTA_T = 0.001;
-float K_FRICTION = -2;
-float K_ELASTIC = -1;
+float DELTA_T = 0.05f;
+float K_FRICTION = -3.0f;
+float K_ELASTIC = -10.0f;
 PVector GRAVITY = new PVector(0, -9.81);
 boolean EULER_SOLVER = true;
 
 void setup() {
   size(1080, 720, P3D); 
-  frameRate(30);
-  
+  frameRate(120);
+
   SetupParticles();
 }
 
 void draw() {
   background(0);
   lights();
-//  DrawAxis();
+  DrawAxis();
 
   ParticleLoop();
 }
@@ -29,12 +30,11 @@ void SetupParticles() {
   for (int r = 0; r < ROW_NUM; r++) {
 
     for (int c = 0; c < COL_NUM; c++) {
-      
+
       if ((r == 0 && c == 0) || r == 0 && c == COL_NUM-1) {
         particle[c][r] = new Particle(c, r, 1.0f, true, color(255));
-      }
-      else {
-        particle[c][r] = new Particle(c, r, 1.0f, false, color(255));        
+      } else {
+        particle[c][r] = new Particle(c, r, 1.0f, false, color(255));
       }
     }
   }
@@ -43,9 +43,9 @@ void SetupParticles() {
 
 void ParticleLoop() {
 
-  for (int r = 0; r < ROW_NUM; r++) {
+  for (int c = 0; c < COL_NUM; c++) {
 
-    for (int c = 0; c < COL_NUM; c++) {
+    for (int r = 0; r < ROW_NUM; r++) {
 
       //Init force to 0
       particle[c][r].SetForce(new PVector(0, 0, 0));
@@ -54,10 +54,12 @@ void ParticleLoop() {
       if (r < ROW_NUM - 1) {
         particle[c][r].CalculateAdjacentForce(particle[c][r+1]);
       }     
+
       //Forces above
       if (r > 0) {
         particle[c][r].CalculateAdjacentForce(particle[c][r-1]);
-      }    
+      }   
+
       //Forces right
       if (c < COL_NUM - 1) {
         particle[c][r].CalculateAdjacentForce(particle[c+1][r]);
@@ -87,30 +89,46 @@ void ParticleLoop() {
       //Gravity
       particle[c][r].CalculateGravity();
 
-      //Update velocity, acceleration and position
-      particle[c][r].Update();
-      
+      //particle[c][r].Debug();
+    }
+  }
+
+
+  for (int c = 0; c < COL_NUM; c++) {
+
+    for (int r = 0; r < ROW_NUM; r++) {
+
+      if (!particle[c][r].IsFixed()) {
+        //Update velocity, acceleration and position
+        particle[c][r].Update();
+      }
+
       //Draw particle
       particle[c][r].Draw();
     }
   }
+  //print("end of cycle\n");
+}
+
+void ShiftPerspective() {
+  rotateX(radians(-35.26));
+  rotateY(radians(45));
+  translate(width/10, height/8, width/2);
 }
 
 void DrawAxis() {
   push();
   strokeWeight(1);
   stroke(255);
-  rotateX(radians(-35.26));
-  rotateY(radians(45));
-  translate(0, 71, 764);
-  textSize(8);
+  ShiftPerspective();
+  textSize(50);
   fill(255);
   line(1000, 0, 0, -1000, 0, 0);
-  text("x", 20, 0, 0);
+  text("x", 1000, 0, 0);
   line(0, 1000, 0, 0, -1000, 0);
-  text("y", 0, 20, 0);
+  text("y", 0, 1000, 0);
   line(0, 0, 1000, 0, 0, -1000); 
-  text("z", 0, 0, 20);
+  text("z", 0, 0, 1000);
 
   pop();
 }

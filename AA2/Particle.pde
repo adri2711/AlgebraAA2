@@ -11,7 +11,7 @@ class Particle {
 
   Particle (int row, int col, float mass, boolean isFixed, color color_p) {
     this.index = new PVector(row, col);
-    this.pos = new PVector((row-1) * SPACING, (col-1) * SPACING, 0.0);
+    this.pos = new PVector((float)(row * SPACING), (float)(col * (10*SPACING/TILT)), (float)(col * (10*TILT/SPACING)));
     this.posInit = this.pos.copy();
 
     this.mass = mass;
@@ -28,16 +28,29 @@ class Particle {
   //  Adds tension and friction forces applied by an adjacent particle (adj).
   //
   void CalculateAdjacentForce(Particle adj) {
-
+    //Debug();
     float distInit = posInit.dist(adj.posInit);
+    //print("\nDistInit: ",distInit,"\n");
     float distCurr = pos.dist(adj.pos);
+    //print("DistCurr: ",distCurr,"\n\n");
 
     float tension = -K_ELASTIC * (distCurr - distInit);    //-k*dx
-    PVector tVector = (pos.sub(adj.pos)).div(distCurr);   //Normalized tension vector
+    //print("Tension: ",tension,"\n");
+    PVector tVector = new PVector(0,0,0);   //Normalized tension vector
+    PVector temp = pos.copy();
+    tVector.set((temp.sub(adj.pos)).div(distCurr));
+    //print("TVector: ",tVector,"\n");
+    
     force.sub(tVector.mult(tension));
 
-    PVector fVector = vel.sub(adj.vel);                   //Friction vector
+    PVector fVector = new PVector(0,0,0);  //Friction vector
+    PVector temp2 = vel.copy();
+    fVector.set(temp2.sub(adj.vel));
+    //print("FVector: ",fVector,"\n\n");
+    
     force.sub(fVector.mult(-K_FRICTION));
+    //print("Force: " ,force,"\n");    
+    //Debug();
   }
 
   //CalculateGravity:
@@ -51,6 +64,7 @@ class Particle {
   //  Updates velocity, acceleration and position of the particle based
   //  on the forces that affect it.
   void Update() {
+    //Debug();
     acc = force.div(mass);
     //Euler solver
     if (EULER_SOLVER) {
@@ -60,6 +74,8 @@ class Particle {
     //Something something solver
     else {
     }
+    
+    //Debug();
   }
 
   void SetPos(PVector newPos) {
@@ -73,27 +89,32 @@ class Particle {
 
   void Draw() {
     push();
-    /*translate(pos.x, pos.y, pos.z);
-    rotateX(radians(-35.26));
-    rotateY(radians(45));*/
+    
+    ShiftPerspective();
+    translate(pos.x, pos.y, pos.z);
 
     strokeWeight(0);
     fill(color_p);
     ellipse(0, 0, mass*10, mass*10);
+    
+    /*textSize(10);
+    text((int)index.x,-5,-5,0);
+    text((int)index.y,5,-5,0);*/
+    
     pop();
   }
 
-  /*void Debug() {
-   print("Pos: ", pos.x, ",", pos.y, ",", pos.z, "\n");
-   print("Anchor: ", anchor.x, ",", anchor.y, ",", anchor.z, "\n");
-   if (!isFixed) {
-   print("Force: ", force.x, ",", force.y, ",", force.z, "\n");
-   print("Speed: ", speed.x, ",", speed.y, ",", speed.z, "\n");
-   } else {
-   print ("Fixed\n");
-   }
-   print("\n");
-   }*/
+  void Debug() {
+    print("\n\n",index,":\n");
+    print("Pos: ", pos.x, ",", pos.y, ",", pos.z, "\n");
+    print("Init Pos: ", posInit.x, ",", posInit.y, ",", posInit.z, "\n");
+    if (!isFixed) {
+      print("Force: ", force.x, ",", force.y, ",", force.z, "\n");
+      print("Velocity: ", vel.x, ",", vel.y, ",", vel.z, "\n");
+    } else {
+      print ("Fixed\n");
+    }
+  }
 
 
   PVector ReturnPos() {
