@@ -1,14 +1,14 @@
-int ROW_NUM = 20;
-int COL_NUM = 20;
+int ROW_NUM = 30;
+int COL_NUM = 30;
 Particle[][] particle = new Particle[COL_NUM][ROW_NUM];
-float SPACING = 15.0f;  //space between nodes
+float SPACING = 10.0f;  //space between nodes
 float TILT = 0.75f;      //tilt of the cloth
-float MASS = 0.5f;
+float MASS = 1f;
 
 float DELTA_T_EULER = 0.05f;
-float DELTA_T_VERLET = 0.01f;
+float DELTA_T_VERLET = 0.03f;
 float K_FRICTION = -2.0f;
-float K_ELASTIC = -10.0f;
+float K_ELASTIC = -50.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
@@ -16,16 +16,16 @@ boolean EULER_SOLVER = true;
 
 void setup() {
   size(1080, 720, P3D); 
-  frameRate(120);
+  frameRate(60);
 
-  ChangeSolverMode();
+  //ChangeSolverMode();
   SetupParticles();
 }
 
 void draw() {
   background(0);
   lights();
-  DrawAxis();
+  //DrawAxis();
 
   ParticleLoop();
 }
@@ -42,7 +42,7 @@ void SetupParticles() {
       if ((r == 0 && c == 0) || r == 0 && c == COL_NUM-1) {
         particle[c][r] = new Particle(c, r, MASS, true, color(250));
       } else {
-        particle[c][r] = new Particle(c, r, MASS, false, color(250-(c+r*8)));
+        particle[c][r] = new Particle(c, r, MASS, false, color(250-(c+r*5)));
       }
     }
   }
