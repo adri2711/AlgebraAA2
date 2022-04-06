@@ -3,6 +3,8 @@ class Particle {
   private PVector index;
   private PVector pos;
   private PVector posInit;
+  private PVector posPrev;
+  private PVector posEvenMorePrev;
   private PVector vel;
   private PVector acc;
   private PVector force;
@@ -11,8 +13,10 @@ class Particle {
 
   Particle (int row, int col, float mass, boolean isFixed, color color_p) {
     this.index = new PVector(row, col);
-    this.pos = new PVector((float)(row * SPACING), (float)(col * (10*SPACING/TILT)), (float)(col * (10*TILT/SPACING)));
+    this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING), (float)(col * TILT));
     this.posInit = this.pos.copy();
+    this.posPrev = this.pos.copy();
+    this.posEvenMorePrev = this.pos.copy();
 
     this.mass = mass;
     this.color_p = color_p;
@@ -27,7 +31,7 @@ class Particle {
   //CalculateAdjacentForce:
   //  Adds tension and friction forces applied by an adjacent particle (adj).
   //
-  void CalculateAdjacentForce(Particle adj) {
+  void CalculateAdjacentForce(Particle adj, float strength) {
     //Debug();
     float distInit = posInit.dist(adj.posInit);
     //print("\nDistInit: ",distInit,"\n");
@@ -41,14 +45,14 @@ class Particle {
     tVector.set((temp.sub(adj.pos)).div(distCurr));
     //print("TVector: ",tVector,"\n");
     
-    force.sub(tVector.mult(tension));
+    force.sub(tVector.mult(tension).mult(strength));
 
     PVector fVector = new PVector(0,0,0);  //Friction vector
     PVector temp2 = vel.copy();
     fVector.set(temp2.sub(adj.vel));
     //print("FVector: ",fVector,"\n\n");
     
-    force.sub(fVector.mult(-K_FRICTION));
+    force.sub(fVector.mult(-K_FRICTION).mult(strength));
     //print("Force: " ,force,"\n");    
     //Debug();
   }
@@ -68,13 +72,15 @@ class Particle {
     acc = force.div(mass);
     //Euler solver
     if (EULER_SOLVER) {
-      vel = new PVector(Euler(vel.x, acc.x, DELTA_T), Euler(vel.y, acc.y, DELTA_T), Euler(vel.z, acc.z, DELTA_T));
-      pos = new PVector(Euler(pos.x, vel.x, DELTA_T), Euler(pos.y, vel.y, DELTA_T), Euler(pos.z, vel.z, DELTA_T));
+      vel = new PVector(Euler(vel.x, acc.x, DELTA_T_EULER), Euler(vel.y, acc.y, DELTA_T_EULER), Euler(vel.z, acc.z, DELTA_T_EULER));
+      pos = new PVector(Euler(pos.x, vel.x, DELTA_T_EULER), Euler(pos.y, vel.y, DELTA_T_EULER), Euler(pos.z, vel.z, DELTA_T_EULER));
     }
-    //Something something solver
+    //Verlet solver
     else {
+      pos = new PVector(Verlet(pos.x, posEvenMorePrev.x, acc.x, DELTA_T_VERLET), Verlet(pos.y, posEvenMorePrev.y, acc.y, DELTA_T_VERLET), Verlet(pos.z, posEvenMorePrev.z, acc.z, DELTA_T_VERLET));
     }
-    
+    posEvenMorePrev = posPrev.copy();
+    posPrev = pos.copy();
     //Debug();
   }
 
@@ -95,7 +101,7 @@ class Particle {
 
     strokeWeight(0);
     fill(color_p);
-    ellipse(0, 0, mass*10, mass*10);
+    ellipse(0, 0, 10, 10);
     
     /*textSize(10);
     text((int)index.x,-5,-5,0);
