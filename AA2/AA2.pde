@@ -1,14 +1,14 @@
-int ROW_NUM = 10;
-int COL_NUM = 10;
+int ROW_NUM = 20;
+int COL_NUM = 20;
 Particle[][] particle = new Particle[COL_NUM][ROW_NUM];
-float SPACING = 20.0f;  //space between nodes
-float TILT = 20.0f;      //tilt of the cloth
+float SPACING = 15.0f;  //space between nodes
+float TILT = 0.75f;      //tilt of the cloth
 float MASS = 0.5f;
 
 float DELTA_T_EULER = 0.05f;
-float DELTA_T_VERLET = 0.02f;
-float K_FRICTION = -1.0f;
-float K_ELASTIC = -5.0f;
+float DELTA_T_VERLET = 0.01f;
+float K_FRICTION = -2.0f;
+float K_ELASTIC = -10.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
@@ -17,8 +17,8 @@ boolean EULER_SOLVER = true;
 void setup() {
   size(1080, 720, P3D); 
   frameRate(120);
-  
-  //ChangeSolverMode();
+
+  ChangeSolverMode();
   SetupParticles();
 }
 
@@ -32,18 +32,6 @@ void draw() {
 
 void ChangeSolverMode() {
   EULER_SOLVER = !EULER_SOLVER;
-  if (EULER_SOLVER) {
-    K_ELASTIC /= 10;
-    K_FRICTION /= 5;
-    K_STRETCH /= 5;
-  }
-  else {
-    K_ELASTIC *= 5;
-    K_FRICTION *= 10;
-    K_STRETCH *= 5;
-    K_SHEAR *= 20;
-    MASS *= 4;
-  }
 }
 
 void SetupParticles() {
@@ -52,9 +40,9 @@ void SetupParticles() {
     for (int c = 0; c < COL_NUM; c++) {
 
       if ((r == 0 && c == 0) || r == 0 && c == COL_NUM-1) {
-        particle[c][r] = new Particle(c, r, MASS, true, color(255));
+        particle[c][r] = new Particle(c, r, MASS, true, color(250));
       } else {
-        particle[c][r] = new Particle(c, r, MASS, false, color(255));
+        particle[c][r] = new Particle(c, r, MASS, false, color(250-(c+r*8)));
       }
     }
   }
@@ -72,38 +60,38 @@ void ParticleLoop() {
 
       //Forces below
       if (r < ROW_NUM - 1) {
-        particle[c][r].CalculateAdjacentForce(particle[c][r+1],K_STRETCH);
+        particle[c][r].CalculateAdjacentForce(particle[c][r+1], K_STRETCH);
       }     
 
       //Forces above
       if (r > 0) {
-        particle[c][r].CalculateAdjacentForce(particle[c][r-1],K_STRETCH);
+        particle[c][r].CalculateAdjacentForce(particle[c][r-1], K_STRETCH);
       }   
 
       //Forces right
       if (c < COL_NUM - 1) {
-        particle[c][r].CalculateAdjacentForce(particle[c+1][r],K_STRETCH);
+        particle[c][r].CalculateAdjacentForce(particle[c+1][r], K_STRETCH);
       }    
       //Forces left
       if (c > 0) {
-        particle[c][r].CalculateAdjacentForce(particle[c-1][r],K_STRETCH);
+        particle[c][r].CalculateAdjacentForce(particle[c-1][r], K_STRETCH);
       }
 
       //Forces bottom right
       if (c < COL_NUM - 1 && r < ROW_NUM - 1) {
-        particle[c][r].CalculateAdjacentForce(particle[c+1][r+1],K_SHEAR);
+        particle[c][r].CalculateAdjacentForce(particle[c+1][r+1], K_SHEAR);
       }     
       //Forces top right
       if (c < COL_NUM - 1 && r > 0) {
-        particle[c][r].CalculateAdjacentForce(particle[c+1][r-1],K_SHEAR);
+        particle[c][r].CalculateAdjacentForce(particle[c+1][r-1], K_SHEAR);
       }    
       //Forces bottom left
       if (c > 0 && r < ROW_NUM - 1) {
-        particle[c][r].CalculateAdjacentForce(particle[c-1][r+1],K_SHEAR);
+        particle[c][r].CalculateAdjacentForce(particle[c-1][r+1], K_SHEAR);
       }    
       //Forces top left
       if (c > 0 && r > 0) {
-        particle[c][r].CalculateAdjacentForce(particle[c-1][r-1],K_SHEAR);
+        particle[c][r].CalculateAdjacentForce(particle[c-1][r-1], K_SHEAR);
       }
 
       //Gravity
@@ -124,7 +112,10 @@ void ParticleLoop() {
       }
 
       //Draw particle
-      particle[c][r].Draw();
+      //particle[c][r].DrawParticle();
+      if (c > 0 && r > 0) {
+        particle[c][r].DrawFabric(particle[c-1][r],particle[c-1][r-1],particle[c][r-1]);
+      }
     }
   }
   //print("end of cycle\n");

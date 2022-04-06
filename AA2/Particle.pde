@@ -13,7 +13,7 @@ class Particle {
 
   Particle (int row, int col, float mass, boolean isFixed, color color_p) {
     this.index = new PVector(row, col);
-    this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING), (float)(col * TILT));
+    this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING * (1-TILT)), (float)(col * SPACING * TILT));
     this.posInit = this.pos.copy();
     this.posPrev = this.pos.copy();
     this.posEvenMorePrev = this.pos.copy();
@@ -61,7 +61,8 @@ class Particle {
   //  Adds force of gravity.
   //
   void CalculateGravity() {
-    force.sub(GRAVITY.mult(mass));
+    PVector temp = GRAVITY.copy();
+    force.sub(temp.mult(mass));
   }
 
   //Update:
@@ -69,7 +70,8 @@ class Particle {
   //  on the forces that affect it.
   void Update() {
     //Debug();
-    acc = force.div(mass);
+    PVector temp = force.copy();
+    acc.set(temp.div(mass));
     //Euler solver
     if (EULER_SOLVER) {
       vel = new PVector(Euler(vel.x, acc.x, DELTA_T_EULER), Euler(vel.y, acc.y, DELTA_T_EULER), Euler(vel.z, acc.z, DELTA_T_EULER));
@@ -77,10 +79,12 @@ class Particle {
     }
     //Verlet solver
     else {
+      if (posPrev != pos) {
+        posEvenMorePrev = posPrev.copy();
+      }
+      posPrev = pos.copy();
       pos = new PVector(Verlet(pos.x, posEvenMorePrev.x, acc.x, DELTA_T_VERLET), Verlet(pos.y, posEvenMorePrev.y, acc.y, DELTA_T_VERLET), Verlet(pos.z, posEvenMorePrev.z, acc.z, DELTA_T_VERLET));
     }
-    posEvenMorePrev = posPrev.copy();
-    posPrev = pos.copy();
     //Debug();
   }
 
@@ -93,7 +97,7 @@ class Particle {
   }
 
 
-  void Draw() {
+  void DrawParticle() {
     push();
     
     ShiftPerspective();
@@ -108,6 +112,25 @@ class Particle {
     text((int)index.y,5,-5,0);*/
     
     pop();
+  }
+  
+  void DrawFabric(Particle adj1, Particle adj2, Particle adj3) {
+    push();
+    
+    ShiftPerspective();
+    translate(pos.x, pos.y, pos.z);
+    
+    strokeWeight(0);
+    fill(color_p);
+    
+    beginShape();
+    vertex(0,0,0);
+    vertex(adj1.pos.x-pos.x, adj1.pos.y-pos.y, adj1.pos.z-pos.z);
+    vertex(adj2.pos.x-pos.x, adj2.pos.y-pos.y, adj2.pos.z-pos.z);
+    vertex(adj3.pos.x-pos.x, adj3.pos.y-pos.y, adj3.pos.z-pos.z);
+    endShape(CLOSE);
+    
+    pop();    
   }
 
   void Debug() {
