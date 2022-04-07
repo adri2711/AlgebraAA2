@@ -32,6 +32,14 @@ void draw() {
 
 void ChangeSolverMode() {
   EULER_SOLVER = !EULER_SOLVER;
+  if (!EULER_SOLVER) { 
+    K_FRICTION *= 100;
+    K_ELASTIC *= 5;
+  }
+  else {
+    K_FRICTION /= 100;
+    K_ELASTIC /= 5;
+  }
 }
 
 void SetupParticles() {

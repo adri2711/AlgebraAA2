@@ -32,29 +32,22 @@ class Particle {
   //  Adds tension and friction forces applied by an adjacent particle (adj).
   //
   void CalculateAdjacentForce(Particle adj, float strength) {
-    //Debug();
+
     float distInit = posInit.dist(adj.posInit);
-    //print("\nDistInit: ",distInit,"\n");
     float distCurr = pos.dist(adj.pos);
-    //print("DistCurr: ",distCurr,"\n\n");
 
     float tension = -K_ELASTIC * (distCurr - distInit);    //-k*dx
-    //print("Tension: ",tension,"\n");
-    PVector tVector = new PVector(0,0,0);   //Normalized tension vector
+    PVector tVector = new PVector(0,0,0);                  //Normalized tension vector
     PVector temp = pos.copy();
     tVector.set((temp.sub(adj.pos)).div(distCurr));
-    //print("TVector: ",tVector,"\n");
     
     force.sub(tVector.mult(tension).mult(strength));
 
-    PVector fVector = new PVector(0,0,0);  //Friction vector
+    PVector fVector = new PVector(0,0,0);                  //Friction vector
     PVector temp2 = vel.copy();
     fVector.set(temp2.sub(adj.vel));
-    //print("FVector: ",fVector,"\n\n");
     
     force.sub(fVector.mult(-K_FRICTION).mult(strength));
-    //print("Force: " ,force,"\n");    
-    //Debug();
   }
 
   //CalculateGravity:
@@ -69,7 +62,7 @@ class Particle {
   //  Updates velocity, acceleration and position of the particle based
   //  on the forces that affect it.
   void Update() {
-    //Debug();
+
     PVector temp = force.copy();
     acc.set(temp.div(mass));
     //Euler solver
@@ -85,7 +78,6 @@ class Particle {
       posPrev = pos.copy();
       pos = new PVector(Verlet(pos.x, posEvenMorePrev.x, acc.x, DELTA_T_VERLET), Verlet(pos.y, posEvenMorePrev.y, acc.y, DELTA_T_VERLET), Verlet(pos.z, posEvenMorePrev.z, acc.z, DELTA_T_VERLET));
     }
-    //Debug();
   }
 
   void SetPos(PVector newPos) {
@@ -106,10 +98,6 @@ class Particle {
     strokeWeight(0);
     fill(color_p);
     ellipse(0, 0, 10, 10);
-    
-    /*textSize(10);
-    text((int)index.x,-5,-5,0);
-    text((int)index.y,5,-5,0);*/
     
     pop();
   }
