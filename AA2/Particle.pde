@@ -13,7 +13,7 @@ class Particle {
 
   Particle (int row, int col, float mass, boolean isFixed, color color_p) {
     this.index = new PVector(row, col);
-    this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING * (1-TILT)), (float)(col * SPACING * TILT));
+    this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING * (1-TILT)), (float)(col * pow(-1,VIEW) * SPACING * TILT));
     this.posInit = this.pos.copy();
     this.posPrev = this.pos.copy();
     this.posEvenMorePrev = this.pos.copy();
@@ -57,12 +57,31 @@ class Particle {
     PVector temp = GRAVITY.copy();
     force.sub(temp.mult(mass));
   }
+  
+  //CalculateCollisionForce:
+  //  Adds force applied by solid voxels
+  //
+  void CalculateCollisionForce(PVector normal) {
+    
+    vel.x = max(vel.x * normal.x, 0);
+    vel.y = max(vel.y * normal.y, 0);
+    vel.z = max(vel.z * normal.z, 0);
+    
+    /*vel.x -= vel.x * abs(normal.x);
+    vel.y -= vel.y * abs(normal.y);
+    vel.z -= vel.z * abs(normal.z);*/
+    
+    PVector temp = force.copy();
+    float f = temp.mag();
+    force.sub(normal.mult(f));
+  }
+
 
   //Update:
   //  Updates velocity, acceleration and position of the particle based
   //  on the forces that affect it.
   void Update() {
-
+    
     PVector temp = force.copy();
     acc.set(temp.div(mass));
     //Euler solver
@@ -88,6 +107,9 @@ class Particle {
     force = newForce.copy();
   }
 
+  void SetColor(color newColor) {
+    color_p = newColor;
+  }
 
   void DrawParticle() {
     push();
@@ -134,7 +156,7 @@ class Particle {
   }
 
 
-  PVector ReturnPos() {
+  PVector GetPos() {
     return pos;
   }
 

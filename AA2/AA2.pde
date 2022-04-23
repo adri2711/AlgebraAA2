@@ -1,32 +1,41 @@
-int ROW_NUM = 30;
-int COL_NUM = 30;
+int ROW_NUM = 20;
+int COL_NUM = 20;
 Particle[][] particle = new Particle[COL_NUM][ROW_NUM];
-float SPACING = 10.0f;  //space between nodes
-float TILT = 0.75f;      //tilt of the cloth
+float SPACING = 20.0f;  //space between nodes
+float TILT = 0.75f;     //tilt of the cloth
+int VIEW = 0;           //front or back view (0/1)
 float MASS = 1f;
 
 float DELTA_T_EULER = 0.05f;
 float DELTA_T_VERLET = 0.03f;
 float K_FRICTION = -2.0f;
-float K_ELASTIC = -50.0f;
+float K_ELASTIC = -70.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
 boolean EULER_SOLVER = true;
+
+//voxel stuff
+float VOXEL_SIZE = 30.0f;
+int VOXEL_NUM = 27;
+Voxel[] voxel = new Voxel[VOXEL_NUM];
 
 void setup() {
   size(1080, 720, P3D); 
   frameRate(60);
 
   //ChangeSolverMode();
+  SetupVoxels();
   SetupParticles();
 }
 
 void draw() {
   background(0);
   lights();
-  //DrawAxis();
+  DrawAxis();
 
+
+  VoxelLoop();
   ParticleLoop();
 }
 
@@ -41,6 +50,10 @@ void ChangeSolverMode() {
     K_ELASTIC /= 5;
   }
 }
+
+
+
+////////////////////////    Setup    ////////////////////////
 
 void SetupParticles() {
   for (int r = 0; r < ROW_NUM; r++) {
@@ -57,8 +70,31 @@ void SetupParticles() {
 }
 
 
+void SetupVoxels() {
+  float xCenter = (COL_NUM * SPACING)/2;
+  float yCenter = (COL_NUM * SPACING)/2;
+  float zCenter = (COL_NUM * SPACING)/5;
+  
+  for (int i = -1; i <= 1; i++) {
+    for (int j = -1; j <= 1; j++) {
+      for (int k = -1; k <= 1; k++) {
+      
+        PVector vpos = new PVector(xCenter + i * VOXEL_SIZE, yCenter + j * VOXEL_SIZE, zCenter + k * VOXEL_SIZE);
+        voxel[(i+1)*9 + (j+1)*3 + k+1] = new Voxel(vpos, VOXEL_SIZE, color(240,240,255));
+      
+      }
+    }
+  }
+}
+
+
+////////////////////////    Loops    ////////////////////////
+
 void ParticleLoop() {
 
+  //particle[15][24].Debug();
+  //particle[15][24].SetColor(color(255,100,100));
+  
   for (int c = 0; c < COL_NUM; c++) {
 
     for (int r = 0; r < ROW_NUM; r++) {
@@ -105,7 +141,24 @@ void ParticleLoop() {
       //Gravity
       particle[c][r].CalculateGravity();
 
-      //particle[c][r].Debug();
+      //Voxel collision
+      boolean collide = false;
+      for (int i = 0; i < VOXEL_NUM && !collide; i++) {
+        
+        if (PVector.dist(particle[c][r].GetPos(), voxel[i].GetPos()) <= VOXEL_SIZE) {
+          
+          //particle[c][r].Debug();
+          
+          PVector colVector = voxel[i].CalculateCollisionVector(particle[c][r]);  //returns (0,0,0) if collision did not happen
+          if (colVector.x != 0 || colVector.y != 0 || colVector.z != 0) {
+            
+            particle[c][r].CalculateCollisionForce(colVector);
+            collide = true;
+            
+            //particle[c][r].Debug();
+          } 
+        }
+      }
     }
   }
 
@@ -126,14 +179,28 @@ void ParticleLoop() {
       }
     }
   }
-  //print("end of cycle\n");
 }
+
+
+void VoxelLoop() {
+  
+  for (int i = 0; i < VOXEL_NUM; i++) {
+    
+    voxel[i].Draw();
+  }
+}
+
+
+
+////////////////////////    Visual    ////////////////////////
 
 void ShiftPerspective() {
   rotateX(radians(-35.26));
   rotateY(radians(45));
   translate(width/10, 0, width/2);
+  //translate(width/4, 0, -width/2);
 }
+
 
 void DrawAxis() {
   push();
