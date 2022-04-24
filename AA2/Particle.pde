@@ -84,19 +84,18 @@ class Particle {
     
     PVector temp = force.copy();
     acc.set(temp.div(mass));
-    //Euler solver
+    
     if (EULER_SOLVER) {
+      //Euler solver
       vel = new PVector(Euler(vel.x, acc.x, DELTA_T_EULER), Euler(vel.y, acc.y, DELTA_T_EULER), Euler(vel.z, acc.z, DELTA_T_EULER));
-      pos = new PVector(Euler(pos.x, vel.x, DELTA_T_EULER), Euler(pos.y, vel.y, DELTA_T_EULER), Euler(pos.z, vel.z, DELTA_T_EULER));
     }
-    //Verlet solver
     else {
-      if (posPrev != pos) {
-        posEvenMorePrev = posPrev.copy();
-      }
-      posPrev = pos.copy();
-      pos = new PVector(Verlet(pos.x, posEvenMorePrev.x, acc.x, DELTA_T_VERLET), Verlet(pos.y, posEvenMorePrev.y, acc.y, DELTA_T_VERLET), Verlet(pos.z, posEvenMorePrev.z, acc.z, DELTA_T_VERLET));
+      //Runge-Kutta 4 solver
+      vel = new PVector(RK4(vel.x, acc.x, DELTA_T_RK), RK4(vel.y, acc.y, DELTA_T_RK), RK4(vel.z, acc.z, DELTA_T_RK));
     }
+    
+    pos = new PVector(Euler(pos.x, vel.x, DELTA_T_EULER), Euler(pos.y, vel.y, DELTA_T_EULER), Euler(pos.z, vel.z, DELTA_T_EULER));
+    
   }
 
   void SetPos(PVector newPos) {

@@ -6,10 +6,10 @@ float TILT = 0.75f;     //tilt of the cloth
 int VIEW = 0;           //front or back view (0/1)
 float MASS = 1f;
 
-float DELTA_T_EULER = 0.05f;
-float DELTA_T_VERLET = 0.03f;
+float DELTA_T_EULER = 0.03f;
+float DELTA_T_RK = 0.04f;
 float K_FRICTION = -2.0f;
-float K_ELASTIC = -5.0f;
+float K_ELASTIC = -70.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
@@ -22,7 +22,7 @@ Voxel[] voxel = new Voxel[VOXEL_NUM];
 
 void setup() {
   size(1080, 720, P3D); 
-  frameRate(60);
+  frameRate(90);
 
   //ChangeSolverMode();
   SetupVoxels();

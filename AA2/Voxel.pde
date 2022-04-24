@@ -16,7 +16,7 @@ class Voxel {
   //  the particle collided, or an empty vector if it has not collided.
   PVector CalculateCollisionVector(Particle p) {
     
-    float leniency = side/5;
+    float leniency = side/3;
     float radius = side / 2 + leniency;
     PVector pPos = p.GetPos();
     if (pPos.x < pos.x+radius && pPos.x > pos.x-radius  &&  pPos.y < pos.y+radius && pPos.y > pos.y-radius  &&  pPos.z < pos.z+radius && pPos.z > pos.z-radius) {
