@@ -37,9 +37,9 @@ class Voxel {
       }
       switch (side) {
         case 0:
-        return new PVector(1,0,0);
-        case 1:
         return new PVector(-1,0,0);
+        case 1:
+        return new PVector(1,0,0);
         case 2:
         return new PVector(0,-1,0);
         case 3:

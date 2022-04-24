@@ -9,7 +9,7 @@ float MASS = 1f;
 float DELTA_T_EULER = 0.05f;
 float DELTA_T_VERLET = 0.03f;
 float K_FRICTION = -2.0f;
-float K_ELASTIC = -70.0f;
+float K_ELASTIC = -5.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
@@ -91,9 +91,6 @@ void SetupVoxels() {
 ////////////////////////    Loops    ////////////////////////
 
 void ParticleLoop() {
-
-  //particle[15][24].Debug();
-  //particle[15][24].SetColor(color(255,100,100));
   
   for (int c = 0; c < COL_NUM; c++) {
 
@@ -147,15 +144,12 @@ void ParticleLoop() {
         
         if (PVector.dist(particle[c][r].GetPos(), voxel[i].GetPos()) <= VOXEL_SIZE) {
           
-          //particle[c][r].Debug();
-          
           PVector colVector = voxel[i].CalculateCollisionVector(particle[c][r]);  //returns (0,0,0) if collision did not happen
           if (colVector.x != 0 || colVector.y != 0 || colVector.z != 0) {
             
             particle[c][r].CalculateCollisionForce(colVector);
             collide = true;
-            
-            //particle[c][r].Debug();
+
           } 
         }
       }
@@ -198,7 +192,6 @@ void ShiftPerspective() {
   rotateX(radians(-35.26));
   rotateY(radians(45));
   translate(width/10, 0, width/2);
-  //translate(width/4, 0, -width/2);
 }
 
 
