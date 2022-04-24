@@ -1,3 +1,4 @@
+//Cloth attributes
 int ROW_NUM = 20;
 int COL_NUM = 20;
 Particle[][] particle = new Particle[COL_NUM][ROW_NUM];
@@ -5,7 +6,7 @@ float SPACING = 20.0f;  //space between nodes
 float TILT = 0.75f;     //tilt of the cloth
 int VIEW = 0;           //front or back view (0/1)
 float MASS = 1f;
-
+//Simulation
 float DELTA_T_EULER = 0.03f;
 float DELTA_T_RK = 0.04f;
 float K_FRICTION = -2.0f;
@@ -14,38 +15,68 @@ float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
 boolean EULER_SOLVER = true;
-
-//voxel stuff
+//Voxels
 float VOXEL_SIZE = 30.0f;
 int VOXEL_NUM = 27;
 Voxel[] voxel = new Voxel[VOXEL_NUM];
+//UI
+int gameStage;
+int solversButtonsDiameter = 120;
+int playButtonDiameter = 170;
+String buttonSelected;
+PVector eulerButtonPos;
+PVector verletButtonPos;
+Slider elasticSlider;
+Slider frictionSlider;
+Slider massSlider;
+
 
 void setup() {
   size(1080, 720, P3D); 
   frameRate(90);
 
-  //ChangeSolverMode();
   SetupVoxels();
   SetupParticles();
+  SetupUI();
 }
+
 
 void draw() {
   background(0);
   lights();
-  DrawAxis();
+  //DrawAxis();
 
-
+  if (gameStage == 0) {
+    Start();
+  }
+  else if (gameStage == 1) {
   VoxelLoop();
   ParticleLoop();
+  }
 }
+
 
 void ChangeSolverMode() {
   EULER_SOLVER = !EULER_SOLVER;
 }
 
 
-
 ////////////////////////    Setup    ////////////////////////
+
+void SetupUI() {
+  eulerButtonPos = new PVector(width / 3, height - height / 5);
+  verletButtonPos = new PVector(width - (eulerButtonPos.x), height - height / 5);
+  
+  elasticSlider = new Slider(-100, -1, 100 , new PVector(width / 5, height / 2 - 20));
+  elasticSlider.SetPoint(new Point(elasticSlider.GetSliderPosition().copy(), elasticSlider.GetSliderRadius()));
+  
+  frictionSlider = new Slider(-2, -0.1f, 100 , new PVector(width / 2, height / 2 - 20));
+  frictionSlider.SetPoint(new Point(frictionSlider.GetSliderPosition().copy(), frictionSlider.GetSliderRadius()));
+  
+  massSlider = new Slider(0.01f, 1, 100 , new PVector(width - width / 5, height / 2 - 20));
+  massSlider.SetPoint(new Point(massSlider.GetSliderPosition().copy(), massSlider.GetSliderRadius()));
+}
+
 
 void SetupParticles() {
   for (int r = 0; r < ROW_NUM; r++) {
