@@ -88,13 +88,15 @@ class Particle {
     if (EULER_SOLVER) {
       //Euler solver
       vel = new PVector(Euler(vel.x, acc.x, DELTA_T_EULER), Euler(vel.y, acc.y, DELTA_T_EULER), Euler(vel.z, acc.z, DELTA_T_EULER));
+      pos = new PVector(Euler(pos.x, vel.x, DELTA_T_EULER), Euler(pos.y, vel.y, DELTA_T_EULER), Euler(pos.z, vel.z, DELTA_T_EULER));
     }
     else {
       //Runge-Kutta 4 solver
       vel = new PVector(RK4(vel.x, acc.x, DELTA_T_RK), RK4(vel.y, acc.y, DELTA_T_RK), RK4(vel.z, acc.z, DELTA_T_RK));
+      pos = new PVector(RK4(pos.x, vel.x, DELTA_T_RK), RK4(pos.y, vel.y, DELTA_T_RK), RK4(pos.z, vel.z, DELTA_T_RK));
     }
     
-    pos = new PVector(Euler(pos.x, vel.x, DELTA_T_EULER), Euler(pos.y, vel.y, DELTA_T_EULER), Euler(pos.z, vel.z, DELTA_T_EULER));
+    
     
   }
 

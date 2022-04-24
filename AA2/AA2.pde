@@ -9,7 +9,7 @@ float MASS = 1f;
 float DELTA_T_EULER = 0.03f;
 float DELTA_T_RK = 0.04f;
 float K_FRICTION = -2.0f;
-float K_ELASTIC = -70.0f;
+float K_ELASTIC = -30.0f;
 float K_STRETCH = 1.0f;
 float K_SHEAR = 0.6f;
 PVector GRAVITY = new PVector(0, -9.81);
@@ -41,14 +41,6 @@ void draw() {
 
 void ChangeSolverMode() {
   EULER_SOLVER = !EULER_SOLVER;
-  if (!EULER_SOLVER) { 
-    K_FRICTION *= 100;
-    K_ELASTIC *= 5;
-  }
-  else {
-    K_FRICTION /= 100;
-    K_ELASTIC /= 5;
-  }
 }
 
 
@@ -71,16 +63,30 @@ void SetupParticles() {
 
 
 void SetupVoxels() {
+  int n = 0;
   float xCenter = (COL_NUM * SPACING)/2;
-  float yCenter = (COL_NUM * SPACING)/2;
+  float yCenter = (COL_NUM * SPACING)/1.5;
   float zCenter = (COL_NUM * SPACING)/5;
   
-  for (int i = -1; i <= 1; i++) {
+  for (int i = 1; i <= 2; i++) {
     for (int j = -1; j <= 1; j++) {
       for (int k = -1; k <= 1; k++) {
       
         PVector vpos = new PVector(xCenter + i * VOXEL_SIZE, yCenter + j * VOXEL_SIZE, zCenter + k * VOXEL_SIZE);
-        voxel[(i+1)*9 + (j+1)*3 + k+1] = new Voxel(vpos, VOXEL_SIZE, color(240,240,255));
+        voxel[n] = new Voxel(vpos, VOXEL_SIZE, color(240,240,255));
+        n++;
+      
+      }
+    }
+  }
+  
+  for (int i = -2; i <= 0; i++) {
+    for (int j = 1; j <= 1; j++) {
+      for (int k = -1; k <= 1; k++) {
+      
+        PVector vpos = new PVector(xCenter + i * VOXEL_SIZE, yCenter + j * VOXEL_SIZE, zCenter + k * VOXEL_SIZE);
+        voxel[n] = new Voxel(vpos, VOXEL_SIZE, color(240,240,255));
+        n++;
       
       }
     }
