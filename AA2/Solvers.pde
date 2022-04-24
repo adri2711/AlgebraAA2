@@ -1,11 +1,14 @@
+//Euler solver
 float Euler(float x, float dx, float deltaT) {
   return x + dx*deltaT;
 }
 
+//Verlet solver (unused)
 float Verlet(float x, float xPrev, float d2x, float deltaT) {
   return 2*x - xPrev + pow(deltaT,2)*d2x;
 }
 
+//Runge-Kutta 4th order solver
 float RK4(float y, float y0, float deltaT) {
   
   float k1 = 0, k2 = 0, k3 = 0, k4 = 0;
@@ -17,6 +20,5 @@ float RK4(float y, float y0, float deltaT) {
   
   float T4 = (k1 + 2*k2 + 2*k3 + k4)/6;
   
-  return y + T4 * deltaT;
-  
+  return y + T4 * deltaT; 
 }

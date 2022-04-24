@@ -3,8 +3,6 @@ class Particle {
   private PVector index;
   private PVector pos;
   private PVector posInit;
-  private PVector posPrev;
-  private PVector posEvenMorePrev;
   private PVector vel;
   private PVector acc;
   private PVector force;
@@ -15,8 +13,6 @@ class Particle {
     this.index = new PVector(row, col);
     this.pos = new PVector((float)(row * SPACING), (float)(col * SPACING * (1-TILT)), (float)(col * pow(-1,VIEW) * SPACING * TILT));
     this.posInit = this.pos.copy();
-    this.posPrev = this.pos.copy();
-    this.posEvenMorePrev = this.pos.copy();
 
     this.mass = mass;
     this.color_p = color_p;
@@ -27,6 +23,7 @@ class Particle {
     acc = new PVector(0.0, 0.0, 0.0);
   }
 
+////////////////////////    Operations    ////////////////////////
 
   //CalculateAdjacentForce:
   //  Adds tension and friction forces applied by an adjacent particle (adj).
@@ -59,17 +56,13 @@ class Particle {
   }
   
   //CalculateCollisionForce:
-  //  Adds force applied by solid voxels
-  //
+  //  Adds force applied by solid voxels and removes velocity
+  //  component in the voxel's direction
   void CalculateCollisionForce(PVector normal) {
     
     vel.x = max(vel.x * normal.x, 0);
     vel.y = max(vel.y * normal.y, 0);
     vel.z = max(vel.z * normal.z, 0);
-    
-    /*vel.x -= vel.x * abs(normal.x);
-    vel.y -= vel.y * abs(normal.y);
-    vel.z -= vel.z * abs(normal.z);*/
     
     PVector temp = force.copy();
     float f = temp.mag();
@@ -95,22 +88,9 @@ class Particle {
       vel = new PVector(RK4(vel.x, acc.x, DELTA_T_RK), RK4(vel.y, acc.y, DELTA_T_RK), RK4(vel.z, acc.z, DELTA_T_RK));
       pos = new PVector(RK4(pos.x, vel.x, DELTA_T_RK), RK4(pos.y, vel.y, DELTA_T_RK), RK4(pos.z, vel.z, DELTA_T_RK));
     }
-    
-    
-    
   }
 
-  void SetPos(PVector newPos) {
-    pos = newPos.copy();
-  }
-
-  void SetForce(PVector newForce) {
-    force = newForce.copy();
-  }
-
-  void SetColor(color newColor) {
-    color_p = newColor;
-  }
+////////////////////////    Visual    ////////////////////////
 
   void DrawParticle() {
     push();
@@ -156,6 +136,21 @@ class Particle {
     }
   }
 
+////////////////////////    Setters    ////////////////////////
+
+  void SetPos(PVector newPos) {
+    pos = newPos.copy();
+  }
+
+  void SetForce(PVector newForce) {
+    force = newForce.copy();
+  }
+
+  void SetColor(color newColor) {
+    color_p = newColor;
+  }
+  
+////////////////////////    Getters    ////////////////////////
 
   PVector GetPos() {
     return pos;

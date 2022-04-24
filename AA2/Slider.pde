@@ -60,21 +60,36 @@ class Slider{
     else if(value > maxValue){
       value = maxValue;
     }
-  }    
+  }  
+  
+  void SetValue(float newValue){
+  
+    fill(255);
+    this.value = newValue;
+    
+    pointToSlide.SetXPosition(map(value, minValue, maxValue, this.GetPoint().GetMinPosX(), this.GetPoint().GetMaxPosX()));
+    
+    if(value < minValue){
+      value = minValue;    
+    }
+    else if(value > maxValue){
+      value = maxValue;
+    }
+  }   
   
   void ShowValue(){
     
     fill(255);
-    textSize(45);
+    textSize(25);
     
     if(value == -100){
-        text(value, sliderPosition.x, sliderPosition.y + 80);    
+        text(value, sliderPosition.x, sliderPosition.y + 50);    
     }
     else if(value > -100 && value <= -10){    
-        text(nf(value, 1, 2), sliderPosition.x, sliderPosition.y + 80);
+        text(nf(value, 1, 2), sliderPosition.x, sliderPosition.y + 50);
     }
     else {    
-        text(nf(value, 0, 2), sliderPosition.x, sliderPosition.y + 80);
+        text(nf(value, 0, 2), sliderPosition.x, sliderPosition.y + 50);
     }
     fill(0);
   }

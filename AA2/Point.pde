@@ -32,7 +32,7 @@ class Point{
     return maxPosX;
   }
   
-  void SetXPosition(int posX){
+  void SetXPosition(float posX){
     this.position.x = posX;
   }
   

@@ -10,9 +10,10 @@ class Voxel {
     this.color_v = color_v;
   }
   
+////////////////////////    Operations    ////////////////////////  
   
   //CalculateCollisionVector:
-  //  Returns vector normal vector of the side against which
+  //  Returns unitary normal vector of the side against which
   //  the particle collided, or an empty vector if it has not collided.
   PVector CalculateCollisionVector(Particle p) {
     
@@ -57,6 +58,7 @@ class Voxel {
     }
   }
   
+////////////////////////    Visual    ////////////////////////  
   
   void Draw() {
     push();
@@ -72,10 +74,14 @@ class Voxel {
     
     pop();   
   }
+
+////////////////////////    Setters    ////////////////////////  
   
   void SetForce(PVector newForce) {
     force = newForce.copy();
   }
+  
+////////////////////////    Getters    ////////////////////////    
   
   PVector GetPos() {
     return pos;

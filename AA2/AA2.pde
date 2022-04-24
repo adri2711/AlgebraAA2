@@ -21,11 +21,17 @@ int VOXEL_NUM = 27;
 Voxel[] voxel = new Voxel[VOXEL_NUM];
 //UI
 int gameStage;
-int solversButtonsDiameter = 120;
-int playButtonDiameter = 170;
+int playButtonDiameter = 130;
+int presetButtonDiameter = 100;
+int backButtonDiameter = 80;
 String buttonSelected;
 PVector eulerButtonPos;
-PVector verletButtonPos;
+PVector rkButtonPos;
+PVector preset1Pos;
+PVector preset2Pos;
+PVector preset3Pos;
+PVector backButtonPos;
+PVector resetButtonPos;
 Slider elasticSlider;
 Slider frictionSlider;
 Slider massSlider;
@@ -35,9 +41,13 @@ void setup() {
   size(1080, 720, P3D); 
   frameRate(90);
 
+  Setup();
+  SetupUI();
+}
+
+void Setup() {
   SetupVoxels();
   SetupParticles();
-  SetupUI();
 }
 
 
@@ -50,30 +60,34 @@ void draw() {
     Start();
   }
   else if (gameStage == 1) {
-  VoxelLoop();
-  ParticleLoop();
+    VoxelLoop();
+    ParticleLoop();
   }
-}
-
-
-void ChangeSolverMode() {
-  EULER_SOLVER = !EULER_SOLVER;
+  
+  ShowButtons();
 }
 
 
 ////////////////////////    Setup    ////////////////////////
 
 void SetupUI() {
-  eulerButtonPos = new PVector(width / 3, height - height / 5);
-  verletButtonPos = new PVector(width - (eulerButtonPos.x), height - height / 5);
+  backButtonPos = new PVector(width/12, height - width/12);
+  resetButtonPos = new PVector(width - width/12, height - width/12);
   
-  elasticSlider = new Slider(-100, -1, 100 , new PVector(width / 5, height / 2 - 20));
+  eulerButtonPos = new PVector(width / 2.5, height/1.15);
+  rkButtonPos = new PVector(width - (eulerButtonPos.x), height/1.15);
+  
+  preset1Pos = new PVector(width/3, height/1.7);  
+  preset2Pos = new PVector(width/2, height/1.7);  
+  preset3Pos = new PVector(2*width/3, height/1.7);
+  
+  elasticSlider = new Slider(10f, 90f, 100 , new PVector(width / 5, height / 3.5));
   elasticSlider.SetPoint(new Point(elasticSlider.GetSliderPosition().copy(), elasticSlider.GetSliderRadius()));
   
-  frictionSlider = new Slider(-2, -0.1f, 100 , new PVector(width / 2, height / 2 - 20));
+  frictionSlider = new Slider(0.5f, 6f, 100 , new PVector(width / 2, height / 3.5));
   frictionSlider.SetPoint(new Point(frictionSlider.GetSliderPosition().copy(), frictionSlider.GetSliderRadius()));
   
-  massSlider = new Slider(0.01f, 1, 100 , new PVector(width - width / 5, height / 2 - 20));
+  massSlider = new Slider(0.1f, 3f, 100 , new PVector(width - width / 5, height / 3.5));
   massSlider.SetPoint(new Point(massSlider.GetSliderPosition().copy(), massSlider.GetSliderRadius()));
 }
 
@@ -85,7 +99,8 @@ void SetupParticles() {
 
       if ((r == 0 && c == 0) || r == 0 && c == COL_NUM-1) {
         particle[c][r] = new Particle(c, r, MASS, true, color(250));
-      } else {
+      }
+      else {
         particle[c][r] = new Particle(c, r, MASS, false, color(250-(c+r*5)));
       }
     }
@@ -133,19 +148,17 @@ void ParticleLoop() {
 
     for (int r = 0; r < ROW_NUM; r++) {
 
+      ////STRETCH/SHEAR FORCES
       //Init force to 0
       particle[c][r].SetForce(new PVector(0, 0, 0));
-
       //Forces below
       if (r < ROW_NUM - 1) {
         particle[c][r].CalculateAdjacentForce(particle[c][r+1], K_STRETCH);
       }     
-
       //Forces above
       if (r > 0) {
         particle[c][r].CalculateAdjacentForce(particle[c][r-1], K_STRETCH);
       }   
-
       //Forces right
       if (c < COL_NUM - 1) {
         particle[c][r].CalculateAdjacentForce(particle[c+1][r], K_STRETCH);
@@ -154,7 +167,6 @@ void ParticleLoop() {
       if (c > 0) {
         particle[c][r].CalculateAdjacentForce(particle[c-1][r], K_STRETCH);
       }
-
       //Forces bottom right
       if (c < COL_NUM - 1 && r < ROW_NUM - 1) {
         particle[c][r].CalculateAdjacentForce(particle[c+1][r+1], K_SHEAR);
@@ -172,10 +184,10 @@ void ParticleLoop() {
         particle[c][r].CalculateAdjacentForce(particle[c-1][r-1], K_SHEAR);
       }
 
-      //Gravity
+      //GRAVITY
       particle[c][r].CalculateGravity();
 
-      //Voxel collision
+      //VOXEL COLLISION
       boolean collide = false;
       for (int i = 0; i < VOXEL_NUM && !collide; i++) {
         
@@ -198,8 +210,8 @@ void ParticleLoop() {
 
     for (int r = 0; r < ROW_NUM; r++) {
 
+      //Update velocity, acceleration and position
       if (!particle[c][r].IsFixed()) {
-        //Update velocity, acceleration and position
         particle[c][r].Update();
       }
 
